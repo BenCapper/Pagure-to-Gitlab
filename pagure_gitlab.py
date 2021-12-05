@@ -1,4 +1,5 @@
 import os
+import time as only_time
 import gitlab
 import datetime
 import requests
@@ -7,23 +8,31 @@ import requests
 tag_list = []
 done_label_list = []
 done_issue_list = []
+issue_list = []
 
-
-pagure_project_name = "<ENTER PAGURE PROJECT NAME HERE>"  # Enter Pagure project name
+session = requests.Session()
+pagure_project_name = "<ENTER_PAGURE_PROJECT_NAME>"  # Enter Pagure project name
 header = {  # Enter Pagure personal access token
-    "Authorization": "token <ENTER TOKEN HERE>"
+    "Authorization": "token <ENTER_PAGURE_PERSONAL_ACCESS_TOKEN>"
 }
-issue_url = "https://pagure.io/api/0/" + pagure_project_name + "/issues?status=all"
+issue_url = "https://pagure.io/api/0/" + pagure_project_name + "/issues?status=all&per_page=100"
 tag_url = "https://pagure.io/api/0/" + pagure_project_name + "/tags"
 issue_response = requests.get(issue_url, headers=header)
 tags_response = requests.get(tag_url, headers=header)
 tag_list = tags_response.json()["tags"]
+pages = session.get(issue_url).json()['pagination']['pages']
 issue_list = issue_response.json()["issues"]
+count = 0
+for p in range(2, pages + 1):
+    page_of_issues_url = "https://pagure.io/api/0/" + pagure_project_name + "/issues?status=all&per_page=100" + "&page=" + str(p)
+    page = session.get(page_of_issues_url).json()['issues']
+    for i in page:
+        issue_list.append(i)
 
 server = gitlab.Gitlab(  # Enter Gitlab personal access token
-    "https://gitlab.com/", private_token="<ENTER TOKEN HERE>", api_version=4
+    "https://gitlab.com/", private_token="<ENTER_GITLAB_PERSONAL_ACCESS_TOKEN", api_version=4
 )
-project = server.projects.get("<ENTER GITLAB PROJECT ID HERE>")  # Enter Gitlab project id
+project = server.projects.get(<ENTER_GITLAB_PROJECT_ID>)  # Enter Gitlab project id
 project_name = project.attributes["name"]
 
 if os.path.exists("done_labels.temp"):
@@ -68,11 +77,11 @@ for issue in issue_list:
     issue_data["id"] = issue["id"]
     issue_data["user"] = issue["user"]["name"]
     issue_data["title"] = issue["title"]
-    if issue_data["title"] in done_issue_list:
+    if str(issue_data["id"]) in done_issue_list:
         print("Issue already exists, skipping...")
     else:
-        done_issue_list.append(issue_data["title"])
-        open_issue_temp = open("done_issues.temp", "a")
+        done_issue_list.append(issue_data["id"])
+        open_temp = open("done_issues.temp", "a")
         description = issue["content"]
         issue_data["confidential"] = issue["private"]
         issue_data["state"] = issue["status"]
@@ -95,8 +104,9 @@ for issue in issue_list:
             + "** said:\n\n"
             + description
         )
+        #only_time.sleep(5)
         create = project.issues.create(issue_data)
-        open_issue_temp.write(issue_data["title"] + "\n")
+        open_temp.write(str(issue_data["id"]) + "\n")
         for comment in issue["comments"]:
             comment_data = {}
             comment_data["name"] = comment["user"]["name"]
