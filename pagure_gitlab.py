@@ -1,5 +1,5 @@
 import os
-import time as only_time
+import time
 import gitlab
 import datetime
 import requests
@@ -11,9 +11,9 @@ done_issue_list = []
 issue_list = []
 
 session = requests.Session()
-pagure_project_name = "<ENTER_PAGURE_PROJECT_NAME>"  # Enter Pagure project name
+pagure_project_name = "ENTER_PAGURE_PROJECT_NAME"  # Enter Pagure project name
 header = {  # Enter Pagure personal access token
-    "Authorization": "token <ENTER_PAGURE_PERSONAL_ACCESS_TOKEN>"
+    "Authorization": "token ENTER_PAGURE_PERSONAL_ACCESS_TOKEN"
 }
 issue_url = "https://pagure.io/api/0/" + pagure_project_name + "/issues?status=all&per_page=100"
 tag_url = "https://pagure.io/api/0/" + pagure_project_name + "/tags"
@@ -22,7 +22,6 @@ tags_response = requests.get(tag_url, headers=header)
 tag_list = tags_response.json()["tags"]
 pages = session.get(issue_url).json()['pagination']['pages']
 issue_list = issue_response.json()["issues"]
-count = 0
 for p in range(2, pages + 1):
     page_of_issues_url = "https://pagure.io/api/0/" + pagure_project_name + "/issues?status=all&per_page=100" + "&page=" + str(p)
     page = session.get(page_of_issues_url).json()['issues']
@@ -30,9 +29,9 @@ for p in range(2, pages + 1):
         issue_list.append(i)
 
 server = gitlab.Gitlab(  # Enter Gitlab personal access token
-    "https://gitlab.com/", private_token="<ENTER_GITLAB_PERSONAL_ACCESS_TOKEN", api_version=4
+    "https://gitlab.com/", private_token="ENTER_GITLAB_PERSONAL_ACCESS_TOKEN", api_version=4
 )
-project = server.projects.get(<ENTER_GITLAB_PROJECT_ID>)  # Enter Gitlab project id
+project = server.projects.get(ENTER_GITLAB_PROJECT_ID_(INT))  # Enter Gitlab project id
 project_name = project.attributes["name"]
 
 if os.path.exists("done_labels.temp"):
@@ -42,6 +41,7 @@ if os.path.exists("done_labels.temp"):
 else:
     os.mknod("done_labels.temp")
 
+# Keep track of completed tags
 for tag in tag_list:
     tag_dict = {}
     tag_url = "https://pagure.io/api/0/" + pagure_project_name + "/tag/" + tag
@@ -62,7 +62,7 @@ for tag in tag_list:
         open_label_temp = open("done_labels.temp", "a")
         open_label_temp.write(single_tag["tag"] + "\n")
 
-
+# Keep track of completed issues
 if os.path.exists("done_issues.temp"):
     open_temp = open("done_issues.temp", "r")
     read_temp = open_temp.read()
@@ -104,7 +104,6 @@ for issue in issue_list:
             + "** said:\n\n"
             + description
         )
-        #only_time.sleep(5)
         create = project.issues.create(issue_data)
         open_temp.write(str(issue_data["id"]) + "\n")
         for comment in issue["comments"]:
@@ -118,9 +117,9 @@ for issue in issue_list:
             notes.append(comment_data)
         issue_data["issue_comments"] = notes
         for note in notes:
-            if "**Metadata Update" in note["comment"]:  # Delete this block
-                pass  # to include metadata comments
-            else:
+            if "**Metadata Update" in note["comment"]:  # Delete this if conditional
+                pass                                    # and move else block into the notes loop
+            else:                                       # to include metadata comments            
                 comment_body = (
                     "On "
                     + note["created_at"][:10]
