@@ -1,7 +1,7 @@
 # Pagure to Gitlab
 
 Pagure example: https://pagure.io/pagure-to-gitlab/issues <br>
-Gitlab example: https://gitlab.com/BenCapper/pagure-to-gitlab/-/issues
+Gitlab example: https://gitlab.com/BenCapper/pagure-to-gitlab-example/-/issues
 
 This script takes issue data from a specified Pagure.io project and uses it to replicate the issues in a Gitlab project.
 
