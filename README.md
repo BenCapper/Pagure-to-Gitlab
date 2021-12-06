@@ -9,22 +9,23 @@ The Gitlab project must be a fresh project with no prior issues created.
 
 Just fill in the following fields and run the script:
 
+
 ~~~
-pagure_project_name = "<ENTER PAGURE PROJECT NAME HERE>"  # Enter Pagure project name
+pagure_project_name = "ENTER_PAGURE_PROJECT_NAME"  # Enter Pagure project name
 ~~~
 
 ~~~
 header = {  # Enter Pagure personal access token
-    "Authorization": "token <ENTER TOKEN HERE>"
+    "Authorization": "token ENTER_PAGURE_PERSONAL_ACCESS_TOKEN"
 }
 ~~~
 
 ~~~
 server = gitlab.Gitlab(  # Enter Gitlab personal access token
-    "https://gitlab.com/", private_token="<ENTER TOKEN HERE>", api_version=4
+    "https://gitlab.com/", private_token="ENTER_GITLAB_PERSONAL_ACCESS_TOKEN", api_version=4
 )
 ~~~
 
 ~~~
-project = server.projects.get("<ENTER GITLAB PROJECT ID HERE>")  # Enter Gitlab project id
+project = server.projects.get(ENTER_GITLAB_PROJECT_ID_(INT))  # Enter Gitlab project id
 ~~~
